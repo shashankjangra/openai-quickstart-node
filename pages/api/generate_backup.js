@@ -15,12 +15,11 @@ export default async function (req, res) {
     return;
   }
 
-  const brandName = req.body.brandName || '';
-  const brandDescription = req.body.brandDescription || '';
-  if (brandName.trim().length === 0 || brandDescription.trim().length === 0) {
+  const animal = req.body.animal || '';
+  if (animal.trim().length === 0) {
     res.status(400).json({
       error: {
-        message: "Please provide a valid brand name and description",
+        message: "Please enter a valid animal",
       }
     });
     return;
@@ -28,15 +27,11 @@ export default async function (req, res) {
 
   try {
     const completion = await openai.createCompletion({
-      model: "text-babbage-001",
-      prompt: generatePrompt(brandName, brandDescription),
+      model: "text-davinci-003",
+      prompt: generatePrompt(animal),
       temperature: 0.6,
-      max_tokens: 50,
-      n: 4,
     });
-
-    const taglines = completion.data.choices.map((choice) => choice.text.trim());
-    res.status(200).json({ taglines });
+    res.status(200).json({ result: completion.data.choices[0].text });
   } catch(error) {
     // Consider adjusting the error handling logic for your use case
     if (error.response) {
@@ -53,14 +48,15 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt(brandName, brandDescription) {
-  return `Generate four tagline suggestions for a brand. The brand names that are generated should be so good that the customers are able to reacall the brand easily.
-  The data you return needs to be in the format:
-  1. Tagline 1
-  2. Tagline 2
+function generatePrompt(animal) {
+  const capitalizedAnimal =
+    animal[0].toUpperCase() + animal.slice(1).toLowerCase();
+  return `Suggest three names for an animal that is a superhero.
 
-Brand Name: ${brandName}
-Brand Description: ${brandDescription}
-
-Taglines:`;
+Animal: Cat
+Names: Captain Sharpclaw, Agent Fluffball, The Incredible Feline
+Animal: Dog
+Names: Ruff the Protector, Wonder Canine, Sir Barks-a-Lot
+Animal: ${capitalizedAnimal}
+Names:`;
 }

@@ -3,8 +3,9 @@ import { useState } from "react";
 import styles from "./index.module.css";
 
 export default function Home() {
-  const [animalInput, setAnimalInput] = useState("");
-  const [result, setResult] = useState();
+  const [brandNameInput, setBrandNameInput] = useState("");
+  const [brandDescriptionInput, setBrandDescriptionInput] = useState("");
+  const [taglines, setTaglines] = useState([]);
 
   async function onSubmit(event) {
     event.preventDefault();
@@ -14,7 +15,10 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ animal: animalInput }),
+        body: JSON.stringify({
+          brandName: brandNameInput,
+          brandDescription: brandDescriptionInput,
+        }),
       });
 
       const data = await response.json();
@@ -22,9 +26,10 @@ export default function Home() {
         throw data.error || new Error(`Request failed with status ${response.status}`);
       }
 
-      setResult(data.result);
-      setAnimalInput("");
-    } catch(error) {
+      setTaglines(data.taglines);
+      setBrandNameInput("");
+      setBrandDescriptionInput("");
+    } catch (error) {
       // Consider implementing your own error handling logic here
       console.error(error);
       alert(error.message);
@@ -40,18 +45,37 @@ export default function Home() {
 
       <main className={styles.main}>
         <img src="/dog.png" className={styles.icon} />
-        <h3>Name my pet</h3>
+        <h3>Create Taglines</h3>
         <form onSubmit={onSubmit}>
-          <input
-            type="text"
-            name="animal"
-            placeholder="Enter an animal"
-            value={animalInput}
-            onChange={(e) => setAnimalInput(e.target.value)}
-          />
-          <input type="submit" value="Generate names" />
+          <div>
+            <label htmlFor="brandName">Brand Name:</label>
+            <input
+              type="text"
+              id="brandName"
+              name="brandName"
+              placeholder="Enter the brand name"
+              value={brandNameInput}
+              onChange={(e) => setBrandNameInput(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="brandDescription">Brand Description:</label>
+            <input
+              type="text"
+              id="brandDescription"
+              name="brandDescription"
+              placeholder="Enter what the brand does"
+              value={brandDescriptionInput}
+              onChange={(e) => setBrandDescriptionInput(e.target.value)}
+            />
+          </div>
+          <input type="submit" value="Generate Taglines" />
         </form>
-        <div className={styles.result}>{result}</div>
+        <div>
+          {taglines.map((tagline, index) => (
+            <p key={index}>{tagline}</p>
+          ))}
+        </div>
       </main>
     </div>
   );
